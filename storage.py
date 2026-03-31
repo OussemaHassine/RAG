@@ -5,9 +5,10 @@ load_dotenv()
 from models import Chunk
 import uuid
 from openai import OpenAI
-from qdrant_client.models import VectorParams, Distance
-from qdrant_client.models import PointStruct
+from qdrant_client.models import VectorParams, Distance, SparseVectorParams
+from qdrant_client.models import PointStruct, SparseVector
 from clients import client, qdrant_client
+from models import sparse_model
 
 def embed_chunks(chunks: list[Chunk]) -> list[Chunk]:
     """Add embeddings to a list of chunks."""
@@ -18,28 +19,48 @@ def embed_chunks(chunks: list[Chunk]) -> list[Chunk]:
         )
         chunk.embedding = response.data[0].embedding
     return chunks
+def sparse_embed_chunks(chunks: list[Chunk]) -> list[Chunk]:
+    """Add sparse embeddings to a list of chunks."""
+    for chunk in chunks:
+        result = list(sparse_model.embed([chunk.text]))[0]
+        chunk.sparse_embedding = {
+            "indices": result.indices.tolist(),
+            "values": result.values.tolist()
+        }
+    return chunks
+
 def create_collection(collection_name: str):
     """Create a Qdrant collection if it doesn't exist."""
     existing_collections = qdrant_client.get_collections().collections
     if collection_name not in [col.name for col in existing_collections]:
         qdrant_client.create_collection(
             collection_name=collection_name,
-            vectors_config=VectorParams(
-                size=1536,  # Size of the embedding vector
-                distance=Distance.COSINE  # Distance metric for similarity search
-            )
+            vectors_config={
+                "dense": VectorParams(
+                    size=1536,  # Size of the embedding vector
+                    distance=Distance.COSINE  # Distance metric for similarity search
+                )},
+                sparse_vectors_config={
+                    "sparse": SparseVectorParams()     
+                }
         )
         print (f"Collection '{collection_name}' created.")
     else:
         print (f"Collection '{collection_name}' already exists.")
     
-def upsert_chunks(chunks: list[Chunk], collection_name: str):
+def upsert_chunks(chunks: list[Chunk], collection_name: str, batch_size: int = 100):
     """Store chunks with embeddings in Qdrant."""
     points = []
     for chunk in chunks:
         point = PointStruct(
             id=str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{chunk.source_filename}_{chunk.chunk_index}")),
-            vector=chunk.embedding,
+            vector={
+                "dense": chunk.embedding,
+                "sparse": SparseVector(
+                    indices=chunk.sparse_embedding["indices"],
+                    values=chunk.sparse_embedding["values"]
+                )
+            },
             payload={
                 "text": chunk.text,
                 "source_filename": chunk.source_filename,
@@ -54,5 +75,10 @@ def upsert_chunks(chunks: list[Chunk], collection_name: str):
 def store_chunks(chunks: list[Chunk], collection_name: str):
     """Embed and store chunks in Qdrant."""
     create_collection(collection_name)
+    print("Dense Embedding chunks...")
     embedded_chunks = embed_chunks(chunks)
-    upsert_chunks(embedded_chunks, collection_name)
+    print("Sparse Embedding chunks...")
+    sparse_embedded_chunks = sparse_embed_chunks(embedded_chunks)
+    print("Upserting chunks to Qdrant...")
+    upsert_chunks(sparse_embedded_chunks, collection_name)
+    print(f"Stored {len(chunks)} chunks in collection '{collection_name}'.")
