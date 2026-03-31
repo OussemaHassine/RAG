@@ -10,30 +10,33 @@ from clients import qdrant_client
 
 def verify_file_existance_in_qdrant(collection_name: str, source_filename: str, chunk_method: str) -> bool:
     """Check if a file has already been processed and stored in Qdrant and by which chunking method."""
-    points, _ = qdrant_client.scroll(
-        collection_name=collection_name,
-        scroll_filter=Filter(
-            must=[
-                FieldCondition(
-                    key="source_filename",
-                    match=MatchValue(value=source_filename),
-                
-                ),
-                FieldCondition(
-                    key="chunk_method",
-                    match=MatchValue(value=chunk_method),
-                )
-            ]
-        ),
-        limit=1
-    )
-    return len(points) > 0
+    try:
+        points, _ = qdrant_client.scroll(
+            collection_name=collection_name,
+            scroll_filter=Filter(
+                must=[
+                    FieldCondition(
+                        key="source_filename",
+                        match=MatchValue(value=source_filename),
+                    
+                    ),
+                    FieldCondition(
+                        key="chunk_method",
+                        match=MatchValue(value=chunk_method),
+                    )
+                ]
+            ),
+            limit=1
+        )
+        return len(points) > 0
+    except Exception as e:
+        print(f"Error checking file existence in Qdrant: {e}")
+        return False
 
 def process_document(path: str, collection_name: str, method: str = "semantic"):
     """Full pipeline to process a document and store it in Qdrant."""
     if verify_file_existance_in_qdrant(collection_name, os.path.basename(path), method):
         print(f"Document '{os.path.basename(path)}' with chunking method '{method}' already exists in collection '{collection_name}'. Skipping processing.")
-        return
     else:
         print(f"Processing document: {path}")
         chunks = get_chunks(path, method)
@@ -43,4 +46,4 @@ def process_document(path: str, collection_name: str, method: str = "semantic"):
         store_chunks(chunks, collection_name)
         print("Document processing complete.")
 
-process_document("bando.pdf", "1st_collection", method="semantic")
+process_document("bando.pdf", "recursive_collection", method="recursive")

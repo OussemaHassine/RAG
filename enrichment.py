@@ -3,9 +3,9 @@ import os
 from openai import OpenAI
 import time
 from dotenv import load_dotenv
+from clients import client
 
 load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 def add_summary(chunks: list[Chunk]) -> list[Chunk]:
     """Add a summary to an existing chunk."""
     for chunk in chunks:

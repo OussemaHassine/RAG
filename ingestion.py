@@ -80,4 +80,11 @@ def get_chunks(path: str, method: str = "semantic") -> list[Chunk]:
         return get_recursive_chunks(text, source_filename)
     else:
         raise ValueError(f"Unknown chunking method: {method}")
-    
+
+
+semantic_chunks=get_chunks("bando.pdf", method="semantic")
+recursive_chunks=get_chunks("bando.pdf", method="recursive")
+for chunk in semantic_chunks[:20]:
+    print(f"Semantic Chunk {chunk.chunk_index} (chars: {chunk.char_count}): {chunk.text[:100]}...")
+for chunk in recursive_chunks[:20]:
+    print(f"Recursive Chunk {chunk.chunk_index} (chars: {chunk.char_count}): {chunk.text[:100]}...")
