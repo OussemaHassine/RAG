@@ -35,7 +35,7 @@ def get_semantic_chunks(text: list[str], source_filename: str) -> list[Chunk]:
     chunker = SemanticChunker(
         model_name="sentence-transformers/paraphrase-multilingual-mpnet-base-v2",
         similarity_threshold=0.65,
-        max_chunk_size=500
+        max_chunk_size=500,
     )
     chunks = chunker.semantic_chunk(text)
     print(f"Total chunks created: {len(chunks)}")
@@ -48,6 +48,7 @@ def get_semantic_chunks(text: list[str], source_filename: str) -> list[Chunk]:
             chunk_method="semantic",
             char_count=len(chunk)
         ))
+    final_chunks = [chunk for chunk in final_chunks if chunk.char_count > 50]
     return final_chunks
 
 def get_recursive_chunks(text: str, source_filename: str) -> list[Chunk]:
