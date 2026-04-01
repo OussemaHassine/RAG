@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 from clients import qdrant_client
+from retrieval import retrieve
+from prompt import get_answer
 
 def verify_file_existance_in_qdrant(collection_name: str, source_filename: str, chunk_method: str) -> bool:
     """Check if a file has already been processed and stored in Qdrant and by which chunking method."""
@@ -46,4 +48,7 @@ def process_document(path: str, collection_name: str, method: str = "semantic"):
         store_chunks(chunks, collection_name)
         print("Document processing complete.")
 
-process_document("bando.pdf", "recursive_collection", method="recursive")
+process_document("bando.pdf", "semantic_collection", method="semantic")
+query = "When is the deadline for submitting the application?"
+retrieved_chunks = retrieve("semantic_collection", query, top_k=5)
+answer = get_answer(query, retrieved_chunks)
