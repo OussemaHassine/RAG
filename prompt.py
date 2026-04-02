@@ -27,20 +27,24 @@ def generate_prompt(query: str, retrieved_chunks: list[str]) -> str:
             ]
     return messages
 
-def generate_response(messages: list[dict]) -> str:
+def generate_response_stream(messages: list[dict]) -> str:
     """Generate a response from the LLM given a list of messages."""
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=messages,
-        temperature=0.7
+        temperature=0.7,
+        stream=True
     )
-    return response.choices[0].message.content.strip()
+    for chunk in response:
+        delta= chunk.choices[0].delta.content
+        if delta:
+            yield delta
 
 
 def get_answer(query: str, retrieved_chunks: list[str]) -> str:
     """Get an answer for a query using the retrieved chunks."""
     prompt = generate_prompt(query, retrieved_chunks)
-    response = generate_response(prompt)
+    response = generate_response_stream(prompt)
     print(f"Query: {query}\nAnswer: {response}\n")
     print ("Context used:")
     for i, chunk in enumerate(retrieved_chunks, start=1):
