@@ -7,7 +7,11 @@ import os
 
 def extract_text_by_page(pdf_path: str) -> list[str]:
     """Extract text per page, stripping repeated headers/footers heuristically."""
-    doc = fitz.open(pdf_path)
+    if hasattr(pdf_path, "read"):  # file-like object from Streamlit uploader
+        file_bytes = pdf_path.read()
+        doc = fitz.open(stream=file_bytes, filetype="pdf")
+    else:
+        doc = fitz.open(pdf_path)
     pages = [page.get_text() for page in doc]
     return pages
 

@@ -48,7 +48,7 @@ def process_document(path: str, collection_name: str, method: str = "semantic"):
         store_chunks(chunks, collection_name)
         print("Document processing complete.")
 
-process_document("bando.pdf", "recursive_collection", method="recursive")
+""" process_document("bando.pdf", "recursive_collection", method="recursive")
 query = "When is the deadline for submitting the application?"
 retrieved_chunks = retrieve("recursive_collection", query, top_k=5)
-answer = get_answer(query, retrieved_chunks)
+answer = get_answer(query, retrieved_chunks) """
