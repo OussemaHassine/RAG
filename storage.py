@@ -4,7 +4,6 @@ import os
 load_dotenv()
 from models import Chunk
 import uuid
-from openai import OpenAI
 from qdrant_client.models import VectorParams, Distance, SparseVectorParams
 from qdrant_client.models import PointStruct, SparseVector
 from clients import client, qdrant_client, sparse_model
