@@ -27,10 +27,7 @@ def rrf_search(collection_name: str, query: str, top_k: int = 5) -> list[str]:
         collection_name=collection_name,
         prefetch=[
             models.Prefetch(
-                query=models.SparseVector(
-                    indices=query_sparse.indices,
-                    values=query_sparse.values
-                ),
+                query=query_sparse,
                 using="sparse",
                 limit=top_k * 2
             ),
