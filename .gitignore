@@ -1,0 +1,6 @@
+#ignore the environment file and the .gitignore itself
+.env
+.gitignore
+rag_env/
+**/__pycache__/
+*.pdf
