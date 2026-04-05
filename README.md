@@ -10,7 +10,7 @@ A production-grade Retrieval-Augmented Generation (RAG) system that lets you upl
  
 ---
  
-## 🧠 What Makes This Different
+## 🧠 What Makes This GOOD
  
 Although it might seem like an overkill for a personal project, I wanted to implement advanced and sophisticated approaches to learn the most!
 
@@ -36,10 +36,10 @@ The project includes a RAGAS evaluation pipeline (`evaluation/evaluate.py`) that
 - **Context Precision** — are the retrieved chunks actually relevant?
 - **Context Recall** — are all relevant chunks being retrieved?
 
-Based on a single Erasmus Italian PDF document that has 23 pages, the scores were: 
-faithfulness: 0.8807
-answer_relevancy: 0.7479
-llm_context_precision_without_reference: 0.8843
+[Based on a single Erasmus Italian PDF document that has 23 pages](https://www.uniurb.it/it/cdocs/INT/10047-INT-04122025173718-int_bando.pdf), the scores were: 
+- faithfulness: 0.8807
+- answer_relevancy: 0.7479
+- llm_context_precision_without_reference: 0.8843
 
 Results saved to evaluation_results.csv
  
