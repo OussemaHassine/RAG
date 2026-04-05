@@ -27,7 +27,7 @@ def generate_prompt(query: str, retrieved_chunks: list[str]) -> str:
             ]
     return messages
 
-def generate_response_stream(messages: list[dict]) -> str:
+def generate_response_stream(messages: list[dict]) :
     """Generate a response from the LLM given a list of messages."""
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -39,6 +39,7 @@ def generate_response_stream(messages: list[dict]) -> str:
         delta= chunk.choices[0].delta.content
         if delta:
             yield delta
+    
 def generate_response(messages: list[dict]) -> str: 
     """Generate a response from the LLM given a list of messages."""
     response = client.chat.completions.create(
