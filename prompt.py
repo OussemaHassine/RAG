@@ -39,12 +39,29 @@ def generate_response_stream(messages: list[dict]) -> str:
         delta= chunk.choices[0].delta.content
         if delta:
             yield delta
-
+def generate_response(messages: list[dict]) -> str: 
+    """Generate a response from the LLM given a list of messages."""
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        temperature=0.7,
+    )
+    return response.choices[0].message.content
 
 def get_answer(query: str, retrieved_chunks: list[str]) -> str:
     """Get an answer for a query using the retrieved chunks."""
     prompt = generate_prompt(query, retrieved_chunks)
     response = generate_response_stream(prompt)
+    print(f"Query: {query}\nAnswer: {response}\n")
+    print ("Context used:")
+    for i, chunk in enumerate(retrieved_chunks, start=1):
+        print(f"  {i}. {chunk}")
+    return response
+
+def get_answer_non_streaming(query: str, retrieved_chunks: list[str]) -> str:
+    """Get an answer for a query using the retrieved chunks."""
+    prompt = generate_prompt(query, retrieved_chunks)
+    response = generate_response(prompt)
     print(f"Query: {query}\nAnswer: {response}\n")
     print ("Context used:")
     for i, chunk in enumerate(retrieved_chunks, start=1):
