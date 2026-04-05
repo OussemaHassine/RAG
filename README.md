@@ -1,3 +1,16 @@
+---
+title: Document RAG
+emoji: ⚖️
+colorFrom: blue
+colorTo: purple
+sdk: streamlit
+sdk_version: 1.31.0
+python_version: 3.10
+app_file: app.py
+pinned: false
+---
+
+
 # 📄 DocuRAG — Advanced RAG Pipeline for Document Q&A
  
 A production-grade Retrieval-Augmented Generation (RAG) system that lets you upload any PDF and have an intelligent conversation about its contents. Built with advanced retrieval techniques, hybrid search, and conversational memory.
