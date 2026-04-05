@@ -6,7 +6,7 @@ A production-grade Retrieval-Augmented Generation (RAG) system that lets you upl
  
 ## 🚀 Live Demo
  
-> Deployed on Hugging Face Spaces — [link coming soon]
+> [Deployed on Hugging Face Spaces ](https://oussemahassine-rag-hf.hf.space/)
  
 ---
  
