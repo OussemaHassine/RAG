@@ -10,18 +10,21 @@ from clients import client, qdrant_client, sparse_model
 
 
 def embed_chunks(chunks: list[Chunk]) -> list[Chunk]:
-    """Add embeddings to a list of chunks."""
-    for chunk in chunks:
-        response = client.embeddings.create(
-            model="text-embedding-3-small",
-            input=chunk.text
-        )
-        chunk.embedding = response.data[0].embedding
+    """Add embeddings to a list of chunks using a single batched API call."""
+    texts = [chunk.text for chunk in chunks]
+    response = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=texts
+    )
+    for chunk, embedding_obj in zip(chunks, response.data):
+        chunk.embedding = embedding_obj.embedding
     return chunks
+
 def sparse_embed_chunks(chunks: list[Chunk]) -> list[Chunk]:
-    """Add sparse embeddings to a list of chunks."""
-    for chunk in chunks:
-        result = list(sparse_model.embed([chunk.text]))[0]
+    """Add sparse embeddings to a list of chunks in one batched call."""
+    texts = [chunk.text for chunk in chunks]
+    results = list(sparse_model.embed(texts))
+    for chunk, result in zip(chunks, results):
         chunk.sparse_embedding = {
             "indices": result.indices.tolist(),
             "values": result.values.tolist()
@@ -47,17 +50,15 @@ def create_collection(collection_name: str):
     else:
         print (f"Collection '{collection_name}' already exists.")
 
-    #we're going to filter by file_name and chunk method to avoid duplicate processing, so we need to create payload indexes for those fields
-    qdrant_client.create_payload_index(
-    collection_name=collection_name,
-    field_name="source_filename",
-    field_schema="keyword"
-                        )
-    qdrant_client.create_payload_index(
-    collection_name=collection_name,
-    field_name="chunk_method",
-    field_schema="keyword"
-        )
+    for field in ("source_filename", "chunk_method"):
+        try:
+            qdrant_client.create_payload_index(
+                collection_name=collection_name,
+                field_name=field,
+                field_schema="keyword"
+            )
+        except Exception:
+            pass  # Index already exists
     
 def upsert_chunks(chunks: list[Chunk], collection_name: str):
     batch_size = 50
